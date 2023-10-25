@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrokenCode", "BrokenCode.csproj", "{E8E05B61-6089-4C41-8A0F-F58DCCF1FDBF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E8E05B61-6089-4C41-8A0F-F58DCCF1FDBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8E05B61-6089-4C41-8A0F-F58DCCF1FDBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8E05B61-6089-4C41-8A0F-F58DCCF1FDBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8E05B61-6089-4C41-8A0F-F58DCCF1FDBF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33A68CBE-9024-41B9-84A8-939AEED6116C}
+	EndGlobalSection
+EndGlobal
