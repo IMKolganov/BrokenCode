@@ -4,8 +4,7 @@ using BrokenCode;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using BrokenCode.Model;
-using Microsoft.EntityFrameworkCore;
-using BrokenCodeTests.EFAsync;
+using Moq.EntityFrameworkCore;
 
 namespace BrokenCodeTests;
 public class BrokenServiceTests
@@ -17,7 +16,7 @@ public class BrokenServiceTests
     [Fact]
     public async Task GetReport_ReturnsOkObjectResult_WhenCalledWithValidData()
     {
-        _userDbContext = new Mock<UserDbContext>();
+
         var licenseServiceMock = new Mock<ILicenseService>();
 
         licenseServiceMock.Setup(ls => ls.GetLicensesAsync(It.IsAny<Guid>(), It.IsAny<ICollection<string>>()))
@@ -83,21 +82,7 @@ public class BrokenServiceTests
             },
         };
 
-        var queryableUserList = userList.AsQueryable();
-
-        var dbSetMock = new Mock<DbSet<User>>();
-
-        dbSetMock.As<IAsyncEnumerable<User>>()
-            .Setup(m => m.GetAsyncEnumerator(default))
-            .Returns(new TestAsyncEnumerator<User>(queryableUserList.GetEnumerator()));
-
-        dbSetMock.As<IQueryable<User>>().Setup(m => m.Provider)
-            .Returns(new TestAsyncQueryProvider<User>(queryableUserList.Provider));
-
-        dbSetMock.As<IQueryable<User>>().Setup(m => m.Expression).Returns(queryableUserList.Expression);
-        dbSetMock.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(queryableUserList.ElementType);
-        dbSetMock.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(queryableUserList.GetEnumerator());
-
-        _userDbContext.Setup(db => db.Users).Returns(dbSetMock.Object);
+        _userDbContext = new Mock<UserDbContext>();
+        _userDbContext.Setup(x => x.Users).ReturnsDbSet(userList);
     }
 }

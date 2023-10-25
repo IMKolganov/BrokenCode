@@ -100,40 +100,25 @@ namespace BrokenCode
                 }
             }
 
-            //var usersData = await filteredUsers
-            //    .Select(u => new
-            //    {
-            //        u.Id,
-            //        u.UserEmail,
-            //        u.BackupEnabled,
-            //        EmailLastBackupStatus = u.Email.LastBackupStatus,
-            //        EmailLastBackupDate = u.Email.LastBackupDate,
-            //        DriveLastBackupStatus = u.Drive.LastBackupStatus,
-            //        DriveLastBackupDate = u.Drive.LastBackupDate,
-            //        CalendarLastBackupStatus = u.Calendar.LastBackupStatus,
-            //        CalendarLastBackupDate = u.Calendar.LastBackupDate,
-            //    })
-            //    .ToListAsync();
+            var usersData = (await filteredUsers.ToListAsync())
+                .Select(u =>
+                {
+                    string licenseType = userLicenses.ContainsKey(u.Id) ? (userLicenses[u.Id].IsTrial ? "Trial" : "Paid") : "None";
 
-            //var transformedUsersData = filteredUsers
-            //    .Select(u =>
-            //    {
-            //        string licenseType = userLicenses.ContainsKey(u.Id) ? (userLicenses[u.Id].IsTrial ? "Trial" : "Paid") : "None";
-
-            //        return new UserStatistics
-            //        {
-            //            Id = u.Id,
-            //            UserName = u.UserEmail,
-            //            InBackup = u.BackupEnabled,
-            //            EmailLastBackupStatus = u.EmailLastBackupStatus,
-            //            EmailLastBackupDate = u.EmailLastBackupDate,
-            //            DriveLastBackupStatus = u.DriveLastBackupStatus,
-            //            DriveLastBackupDate = u.DriveLastBackupDate,
-            //            CalendarLastBackupStatus = u.CalendarLastBackupStatus,
-            //            CalendarLastBackupDate = u.CalendarLastBackupDate,
-            //            LicenseType = licenseType
-            //        };
-            //    });
+                    return new UserStatistics
+                    {
+                        Id = u.Id,
+                        UserName = u.UserEmail,
+                        InBackup = u.BackupEnabled,
+                        EmailLastBackupStatus = u.Email.LastBackupStatus,
+                        EmailLastBackupDate = u.Email.LastBackupDate,
+                        DriveLastBackupStatus = u.Drive.LastBackupStatus,
+                        DriveLastBackupDate = u.Drive.LastBackupDate,
+                        CalendarLastBackupStatus = u.Calendar.LastBackupStatus,
+                        CalendarLastBackupDate = u.Calendar.LastBackupDate,
+                        LicenseType = licenseType
+                    };
+                });
 
             return new OkObjectResult(new
             {
