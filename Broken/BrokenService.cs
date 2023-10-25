@@ -17,6 +17,9 @@ namespace BrokenCode
         private readonly UserDbContext _db;
         private readonly ILicenseServiceProvider _licenseServiceProvider;
         private int _counter;
+        private readonly object _syncLock = new object();
+
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         private static readonly ILog Log = LogManager.GetLogger(typeof(BrokenService));
 
@@ -28,10 +31,9 @@ namespace BrokenCode
 
         public async Task<IActionResult> GetReport(GetReportRequest request)
         {
-            bool acquiredLock = false;
             try
             {
-                Monitor.Enter(_counter, ref acquiredLock);
+                await _semaphore.WaitAsync();
 
                 while (true)
                 {
@@ -42,9 +44,9 @@ namespace BrokenCode
 
                         return await GetReportAsync(request);
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        Log.Debug($"Attempt {_counter} failed");
+                        Log.Debug($"Attempt {_counter} failed {ex.Message}");
                         _counter++;
 
                         Thread.Sleep(1000);
@@ -53,8 +55,7 @@ namespace BrokenCode
             }
             finally
             {
-                if (acquiredLock)
-                    Monitor.Exit(_counter);
+                _semaphore.Release();
             }
         }
 
@@ -63,10 +64,12 @@ namespace BrokenCode
             var filteredUsers = _db.Users.Where(d => d.DomainId == request.DomainId).Where(b => InBackup(b)).OrderBy(o => o.UserEmail).Cast<User>();
 
             int totalCount = filteredUsers != null ? filteredUsers.Count() : 0;
-            filteredUsers = filteredUsers.Take(request.PageSize).Skip(request.PageSize * request.PageNumber);
+            //filteredUsers = filteredUsers.Take(request.PageSize).Skip(request.PageSize * request.PageNumber); Error!
+            filteredUsers = filteredUsers.Skip(request.PageSize * request.PageNumber).Take(request.PageSize);
+
 
             Dictionary<Guid, LicenseInfo> userLicenses = new Dictionary<Guid, LicenseInfo>();
-            using var licenseService = GetLicenseServiceAndConfigure();
+            var licenseService = GetLicenseServiceAndConfigure();//error
 
             if (licenseService != null)
             {
@@ -77,7 +80,7 @@ namespace BrokenCode
 
                 try
                 {
-                    result = licenseService.GetLicensesAsync(request.DomainId, emails).GetAwaiter().GetResult();
+                    result = await licenseService.GetLicensesAsync(request.DomainId, emails);// Error!
                 }
                 catch (Exception ex)
                 {
@@ -131,7 +134,7 @@ namespace BrokenCode
 
         private ILicenseService GetLicenseServiceAndConfigure()
         {
-            using var result = _licenseServiceProvider.GetLicenseService();
+            var result = _licenseServiceProvider.GetLicenseService();//error
 
             Configure(result.Settings);
 

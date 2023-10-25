@@ -33,12 +33,12 @@ namespace BrokenCode
             base.OnModelCreating(mb);
         }
 
-        public DbSet<User> Users { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
-        public DbSet<Email> Emails { get; set; }
+        public virtual DbSet<Email> Emails { get; set; }
 
-        public DbSet<Drive> Drives { get; set; }
+        public virtual DbSet<Drive> Drives { get; set; }
 
-        public DbSet<Calendar> Calendars { get; set; }
+        public virtual DbSet<Calendar> Calendars { get; set; }
     }
 }
