@@ -16,7 +16,6 @@ public class BrokenServiceTests
     [Fact]
     public async Task GetReport_ReturnsOkObjectResult_WhenCalledWithValidData()
     {
-
         var licenseServiceMock = new Mock<ILicenseService>();
 
         licenseServiceMock.Setup(ls => ls.GetLicensesAsync(It.IsAny<Guid>(), It.IsAny<ICollection<string>>()))

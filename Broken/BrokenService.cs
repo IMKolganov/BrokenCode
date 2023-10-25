@@ -39,7 +39,7 @@ namespace BrokenCode
                 {
                     try
                     {
-                        if (_counter > 2)
+                        if (_counter > 10)
                             return new StatusCodeResult(500);
 
                         return await GetReportAsync(request);
@@ -123,7 +123,7 @@ namespace BrokenCode
             return new OkObjectResult(new
             {
                 TotalCount = totalCount,
-                Data = filteredUsers
+                Data = usersData
             });
         }
 
