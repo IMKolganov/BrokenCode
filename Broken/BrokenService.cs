@@ -28,11 +28,11 @@ public class BrokenService
 
     public async Task<IActionResult> GetReport(GetReportRequest request)
     {
-        int maxCounter = 10;
-        await _semaphore.WaitAsync();
+        int maxAttempts = 10;
 
-        for (int attempt = 0; attempt < maxCounter; attempt++)
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
+            await _semaphore.WaitAsync();
             try
             {
                 return await GetReportAsync(request);
@@ -40,12 +40,6 @@ public class BrokenService
             catch (Exception ex)
             {
                 Log.Debug($"Attempt {attempt + 1} failed: {ex.Message}");
-
-                if (attempt >= maxCounter - 1)
-                {
-                    return new StatusCodeResult(500); // Возвращаем ошибку 500 после последней попытки
-                }
-
                 await Task.Delay(1000);
             }
             finally
@@ -54,7 +48,7 @@ public class BrokenService
             }
         }
 
-        return new StatusCodeResult(500); // если все 10 раз неудача
+        return new ObjectResult("Failed after 10 attemptы") { StatusCode = 500 }; // если все 10 раз неудача
     }
 
 
@@ -93,14 +87,11 @@ public class BrokenService
 
     private IQueryable<User> PreparePageUsersByDomainId(Guid domainId, int pageSize, int pageNumber)
     {
-        var filteredUsers = _db.Users
-                               .Where(d => d.DomainId == domainId)
-                               .Where(b => InBackup(b))
-                               .OrderBy(o => o.UserEmail)
-                               .Skip(pageSize * pageNumber)
-                               .Take(pageSize);
-
-        return filteredUsers;
+        return _db.Users
+                  .Where(d => d.DomainId == domainId && InBackup(d))
+                  .OrderBy(o => o.UserEmail)
+                  .Skip(pageSize * pageNumber)
+                  .Take(pageSize);
     }
 
     private async Task<Dictionary<Guid, LicenseInfo>> GetLicenceTypeAsync(Guid domainId, IQueryable<User> filteredUsers)
@@ -122,7 +113,7 @@ public class BrokenService
             catch (Exception ex)
             {
                 Log.Error($"Problem of getting licenses information: {ex.Message}");
-                throw ex;
+                throw;
             }
 
             if (result != null)
@@ -146,7 +137,7 @@ public class BrokenService
 
     private ILicenseService GetLicenseServiceAndConfigure()
     {
-        var result = _licenseServiceProvider.GetLicenseService();//error
+        var result = _licenseServiceProvider.GetLicenseService();//todo: await
 
         Configure(result.Settings);
 
@@ -155,16 +146,7 @@ public class BrokenService
 
     private void Configure(LicenseServiceSettings settings)
     {
-        if (settings != null)
-        {
-            settings.TimeOut = 5000;
-        }
-        else
-        {
-            settings = new LicenseServiceSettings
-            {
-                TimeOut = 5000
-            };
-        }
+        settings ??= new LicenseServiceSettings();
+        settings.TimeOut = 5000;
     }
 }
